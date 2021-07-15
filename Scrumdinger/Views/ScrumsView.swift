@@ -9,6 +9,12 @@ import SwiftUI
 
 struct ScrumsView: View {
     @Binding var scrums: [DailyScrum]
+    @Environment(\.scenePhase) private var scenePhase
+    @State var isPresented = false
+    @State private var newScrumData = DailyScrum.Data()
+    
+    let saveAction: () -> Void
+    
     var body: some View {
         List {
             ForEach(scrums) { scrum in
@@ -24,9 +30,28 @@ struct ScrumsView: View {
             }
         }
         .navigationTitle("Daily Scrums")
-        .navigationBarItems(trailing: Button(action: {}) {
+        .navigationBarItems(trailing: Button(action: {
+            isPresented = true
+        }) {
             Image(systemName: "plus")
         })
+        .sheet(isPresented: $isPresented) {
+            NavigationView {
+                EditView(scrumData: $newScrumData)
+                .navigationBarItems(leading: Button("Dismiss") {
+                    isPresented = false
+                }, trailing: Button("Add") {
+                    let newScrum = DailyScrum(title: newScrumData.title, attendees: newScrumData.attendees, lengthInMinutes: Int(newScrumData.lengthInMinutes), color: newScrumData.color)
+                    
+                    scrums.append(newScrum)
+                    
+                    isPresented = false
+                })
+            }
+        }
+        .onChange(of: scenePhase) { phase in
+            if phase == .inactive {saveAction()}
+        }
     }
     
     
@@ -45,7 +70,7 @@ struct ScrumsView: View {
 struct ScrumsView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            ScrumsView(scrums: .constant(DailyScrum.data))
+            ScrumsView(scrums: .constant(DailyScrum.data), saveAction: {})
                 .preferredColorScheme(/*@START_MENU_TOKEN@*/.dark/*@END_MENU_TOKEN@*/)
         }
             

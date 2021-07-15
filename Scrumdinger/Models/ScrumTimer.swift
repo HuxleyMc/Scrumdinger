@@ -1,13 +1,9 @@
-//
-//  ScrumTimer.swift
-//  Scrumdinger
-//
-//  Created by Huxley McGuffin on 14/7/21.
-//
+/*
+See LICENSE folder for this sample’s licensing information.
+*/
 
 import Foundation
 import SwiftUI
-
 
 /// Keeps time for a daily scrum meeting. Keep track of the total meeting time, the time for each speaker, and the name of the current speaker.
 class ScrumTimer: ObservableObject {
@@ -27,7 +23,7 @@ class ScrumTimer: ObservableObject {
     /// The number of seconds until all attendees have had a turn to speak.
     @Published var secondsRemaining = 0
     /// All meeting attendees, listed in the order they will speak.
-    var speakers: [Speaker] = []
+    @Published var speakers: [Speaker] = []
 
     /// The scrum meeting length.
     var lengthInMinutes: Int

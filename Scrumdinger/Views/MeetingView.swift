@@ -8,10 +8,15 @@
 import SwiftUI
 import AVFoundation
 
+
 struct MeetingView: View {
     @Binding var scrum: DailyScrum
+
     @StateObject var scrumTimer = ScrumTimer()
+
     var player: AVPlayer { AVPlayer.sharedDingPlayer }
+
+
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 16.0)
@@ -20,27 +25,40 @@ struct MeetingView: View {
                 MeetingHeaderView(secondsElapsed: scrumTimer.secondsElapsed, secondsRemaining: scrumTimer.secondsRemaining, scrumColor: scrum.color)
                 Circle()
                     .strokeBorder(lineWidth: 24, antialiased: true)
-                MeetingFooterView(speakers: scrumTimer.speakers, skipAction: scrumTimer.skipSpeaker)
+                MeetingFooterView(speakers: $scrumTimer.speakers, skipAction: scrumTimer.skipSpeaker)
             }
         }
         .padding()
         .foregroundColor(scrum.color.accessibleFontColor)
-        .onAppear {
+        .onAppear() {
+            let _ = print("Appered")
+            
+            ding()
             
             scrumTimer.reset(lengthInMinutes: scrum.lengthInMinutes, attendees: scrum.attendees)
-            
+
             scrumTimer.speakerChangedAction = {
-                player.seek(to: .zero)
-                
+                ding()
             }
             
+
             scrumTimer.startScrum()
         }
-        .onDisappear {
+        .onDisappear() {
+            let _ = print("Disappered")
             scrumTimer.stopScrum()
+            let newHistory = History(attendees: scrum.attendees, lengthInMinutes: scrumTimer.secondsElapsed / 60)
+            
+            scrum.history.insert(newHistory, at: 0)
         }
     }
+    
+    private func ding() {
+        player.seek(to: .zero)
+        player.play()
+    }
 }
+
 
 struct MeetingView_Previews: PreviewProvider {
     static var previews: some View {
